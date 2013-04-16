@@ -1,7 +1,19 @@
-#define MYVERSION "1.0"
+#define MYVERSION "1.3"
 
 /*
 	changelog
+
+2013-04-16 03:46 UTC - kode54
+- Interpolation fix
+- Version is now 1.3
+
+2013-04-16 02:49 UTC - kode54
+- Crash fix related to previous change set
+- Version is now 1.2
+
+2013-04-16 02:29 UTC - kode54
+- Fixed interpolation by implementing a sample history buffer
+- Version is now 1.1
 
 2013-04-16 00:33 UTC - kode54
 - Initial release completed
