@@ -1,7 +1,11 @@
-#define MYVERSION "1.3"
+#define MYVERSION "1.4"
 
 /*
 	changelog
+
+2013-04-19 00:33 UTC - kode54
+- Another interpolation fix
+- Version is now 1.4
 
 2013-04-16 03:46 UTC - kode54
 - Interpolation fix
