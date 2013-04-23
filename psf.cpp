@@ -1,7 +1,11 @@
-#define MYVERSION "1.4"
+#define MYVERSION "1.5"
 
 /*
 	changelog
+
+2013-04-23 06:17 UTC - kode54
+- Implemented windowed sinc interpolation
+- Version is now 1.5
 
 2013-04-19 00:33 UTC - kode54
 - Another interpolation fix
@@ -1159,6 +1163,7 @@ BOOL CMyPreferences::OnInitDialog(CWindow, LPARAM) {
 	m_interpolation.AddString( _T( "4 Point B-Spline" ) );
 	m_interpolation.AddString( _T( "6 Point Osculating" ) );
 	m_interpolation.AddString( _T( "6 Point B-Spline" ) );
+	m_interpolation.AddString( _T( "18 Point Sinc" ) );
 	m_interpolation.SetCurSel( cfg_interpolation );
 	
 	char temp[16];
