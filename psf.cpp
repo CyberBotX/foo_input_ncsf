@@ -1,7 +1,11 @@
-#define MYVERSION "1.5"
+#define MYVERSION "1.6"
 
 /*
 	changelog
+
+2013-04-26 01:56 UTC - kode54
+- Replaced windowed sinc interpolation with a different implementation
+- Version is now 1.6
 
 2013-04-23 06:17 UTC - kode54
 - Implemented windowed sinc interpolation
@@ -102,7 +106,7 @@ enum
 	default_cfg_suppressopeningsilence = 1,
 	default_cfg_suppressendsilence = 1,
 	default_cfg_endsilenceseconds = 5,
-	default_cfg_interpolation = INTERPOLATION_6POINTBSPLINE
+	default_cfg_interpolation = INTERPOLATION_LANCZOS
 };
 
 static cfg_int cfg_sample_rate(guid_cfg_sample_rate,default_cfg_sample_rate);
@@ -1163,7 +1167,7 @@ BOOL CMyPreferences::OnInitDialog(CWindow, LPARAM) {
 	m_interpolation.AddString( _T( "4 Point B-Spline" ) );
 	m_interpolation.AddString( _T( "6 Point Osculating" ) );
 	m_interpolation.AddString( _T( "6 Point B-Spline" ) );
-	m_interpolation.AddString( _T( "18 Point Sinc" ) );
+	m_interpolation.AddString( _T( "16 Point Lanczos Sinc" ) );
 	m_interpolation.SetCurSel( cfg_interpolation );
 	
 	char temp[16];
