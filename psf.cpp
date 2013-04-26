@@ -1,7 +1,11 @@
-#define MYVERSION "1.6"
+#define MYVERSION "1.7"
 
 /*
 	changelog
+
+2013-04-26 08:48 UTC - kode54
+- Fixed a bug in the Lanczos resampler
+- Version is now 1.7
 
 2013-04-26 01:56 UTC - kode54
 - Replaced windowed sinc interpolation with a different implementation
