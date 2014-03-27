@@ -648,7 +648,7 @@ public:
 		psf_info_meta_state info_state;
 		info_state.info = &m_info;
 
-		if ( psf_load( p_path, &psf_file_system, 0x25, 0, 0, psf_info_meta, &info_state ) <= 0 )
+		if ( psf_load( p_path, &psf_file_system, 0x25, 0, 0, psf_info_meta, &info_state, 0 ) <= 0 )
 			throw exception_io_data( "Not an NCSF file" );
 
 		if ( !info_state.utf8 )
@@ -683,7 +683,7 @@ public:
 	{
 		if ( m_sseq.sdatData.empty() )
 		{
-			if ( psf_load( m_path, &psf_file_system, 0x25, ncsf_loader, &m_sseq, 0, 0 ) <= 0 )
+			if ( psf_load( m_path, &psf_file_system, 0x25, ncsf_loader, &m_sseq, 0, 0, 0 ) <= 0 )
 				throw exception_io_data( "Invalid NCSF file" );
 		}
 		else
