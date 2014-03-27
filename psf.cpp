@@ -1,7 +1,11 @@
-#define MYVERSION "1.7"
+#define MYVERSION "1.8"
 
 /*
 	changelog
+
+2014-03-27 20:32 UTC - kode54
+- Fixed seeking when silence test buffer is not empty
+- Version is now 1.8
 
 2013-04-26 08:48 UTC - kode54
 - Fixed a bug in the Lanczos resampler
@@ -882,6 +886,10 @@ public:
 	{
 		eof = false;
 		first_block = true;
+
+		double buffered_time = (double)(silence_test_buffer.data_available() / 2) / 44100.0;
+
+		ncsfemu_pos += buffered_time;
 
 		silence_test_buffer.reset();
 
