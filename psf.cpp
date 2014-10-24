@@ -1,7 +1,11 @@
-#define MYVERSION "1.8"
+#define MYVERSION "1.9"
 
 /*
 	changelog
+
+2014-10-24 11:43 UTC - CyberBotX
+- Sync from in_ncsf v1.10.3
+- Version is now 1.9
 
 2014-03-27 20:32 UTC - kode54
 - Fixed seeking when silence test buffer is not empty
@@ -53,6 +57,7 @@
 #include "resource.h"
 
 #include <stdio.h>
+#include <time.h>
 
 #include "../../../SSEQPlayer/SDAT.h"
 #include "../../../SSEQPlayer/Player.h"
@@ -75,34 +80,34 @@
 typedef unsigned long u_long;
 
 // {3B68C445-9A2C-43A3-AB55-A3243C0C2EF6}
-static const GUID guid_cfg_sample_rate = 
+static const GUID guid_cfg_sample_rate =
 { 0x3b68c445, 0x9a2c, 0x43a3, { 0xab, 0x55, 0xa3, 0x24, 0x3c, 0xc, 0x2e, 0xf6 } };
 // {8FC7D2C7-BD9F-4551-B514-C4895EF69E82}
-static const GUID guid_cfg_history_rate = 
+static const GUID guid_cfg_history_rate =
 { 0x8fc7d2c7, 0xbd9f, 0x4551, { 0xb5, 0x14, 0xc4, 0x89, 0x5e, 0xf6, 0x9e, 0x82 } };
 // {8E4F962E-AFAD-416F-968E-CAC4A7A1ADC0}
-static const GUID guid_cfg_infinite = 
+static const GUID guid_cfg_infinite =
 { 0x8e4f962e, 0xafad, 0x416f, { 0x96, 0x8e, 0xca, 0xc4, 0xa7, 0xa1, 0xad, 0xc0 } };
 // {327522F2-BDFA-4982-B593-5D34AF3E59FC}
-static const GUID guid_cfg_deflength = 
+static const GUID guid_cfg_deflength =
 { 0x327522f2, 0xbdfa, 0x4982, { 0xb5, 0x93, 0x5d, 0x34, 0xaf, 0x3e, 0x59, 0xfc } };
 // {810437ED-647D-40AD-8257-A79BE51FE118}
-static const GUID guid_cfg_deffade = 
+static const GUID guid_cfg_deffade =
 { 0x810437ed, 0x647d, 0x40ad, { 0x82, 0x57, 0xa7, 0x9b, 0xe5, 0x1f, 0xe1, 0x18 } };
 // {12C840BC-544B-45D4-B43E-7C955EC0A7E6}
-static const GUID guid_cfg_suppressopeningsilence = 
+static const GUID guid_cfg_suppressopeningsilence =
 { 0x12c840bc, 0x544b, 0x45d4, { 0xb4, 0x3e, 0x7c, 0x95, 0x5e, 0xc0, 0xa7, 0xe6 } };
 // {D9AC5614-4B0D-4615-A560-2CA5F0773B33}
-static const GUID guid_cfg_suppressendsilence = 
+static const GUID guid_cfg_suppressendsilence =
 { 0xd9ac5614, 0x4b0d, 0x4615, { 0xa5, 0x60, 0x2c, 0xa5, 0xf0, 0x77, 0x3b, 0x33 } };
 // {F61E9204-4C45-4E77-BD9B-B6018933E33F}
-static const GUID guid_cfg_endsilenceseconds = 
+static const GUID guid_cfg_endsilenceseconds =
 { 0xf61e9204, 0x4c45, 0x4e77, { 0xbd, 0x9b, 0xb6, 0x1, 0x89, 0x33, 0xe3, 0x3f } };
 // {D5A26FCB-DDFE-45CB-8F5A-BA0099639678}
-static const GUID guid_cfg_interpolation = 
+static const GUID guid_cfg_interpolation =
 { 0xd5a26fcb, 0xddfe, 0x45cb, { 0x8f, 0x5a, 0xba, 0x0, 0x99, 0x63, 0x96, 0x78 } };
 // {8CA9918F-8F72-413A-A57D-9D455FA5DC38}
-static const GUID guid_cfg_placement = 
+static const GUID guid_cfg_placement =
 { 0x8ca9918f, 0x8f72, 0x413a, { 0xa5, 0x7d, 0x9d, 0x45, 0x5f, 0xa5, 0xdc, 0x38 } };
 
 enum
@@ -114,7 +119,7 @@ enum
 	default_cfg_suppressopeningsilence = 1,
 	default_cfg_suppressendsilence = 1,
 	default_cfg_endsilenceseconds = 5,
-	default_cfg_interpolation = INTERPOLATION_LANCZOS
+	default_cfg_interpolation = INTERPOLATION_SINC
 };
 
 static cfg_int cfg_sample_rate(guid_cfg_sample_rate,default_cfg_sample_rate);
@@ -693,6 +698,8 @@ public:
 
 		m_player.interpolation = (Interpolation) (int) cfg_interpolation;
 
+		srand(static_cast<unsigned>(time(nullptr)));
+
 		PseudoFile file;
 		file.data = &m_sseq.sdatData;
 
@@ -700,6 +707,7 @@ public:
 
 		auto * sseqToPlay = m_sseq.sdat->sseq.get();
 
+		m_player.sseqVol = Cnv_Scale(sseqToPlay->info.vol);
 		m_player.sampleRate = cfg_sample_rate;
 		m_player.Setup( sseqToPlay );
 		m_player.Timer();
@@ -1157,17 +1165,17 @@ BOOL CMyPreferences::OnInitDialog(CWindow, LPARAM) {
 	SendDlgItemMessage( IDC_INDEFINITE, BM_SETCHECK, cfg_infinite );
 	SendDlgItemMessage( IDC_SOS, BM_SETCHECK, cfg_suppressopeningsilence );
 	SendDlgItemMessage( IDC_SES, BM_SETCHECK, cfg_suppressendsilence );
-	
+
 	SetDlgItemInt( IDC_SILENCE, cfg_endsilenceseconds, FALSE );
-	
+
 	{
 		char temp[16];
 		// wsprintf((char *)&temp, "= %d Hz", 33868800 / cfg_divider);
 		// SetDlgItemText(wnd, IDC_HZ, (char *)&temp);
-		
+
 		print_time_crap( cfg_deflength, (char *)&temp );
 		uSetDlgItemText( m_hWnd, IDC_DLENGTH, (char *)&temp );
-		
+
 		print_time_crap( cfg_deffade, (char *)&temp );
 		uSetDlgItemText( m_hWnd, IDC_DFADE, (char *)&temp );
 	}
@@ -1175,13 +1183,11 @@ BOOL CMyPreferences::OnInitDialog(CWindow, LPARAM) {
 	m_interpolation = GetDlgItem( IDC_INTERPOLATION );
 	m_interpolation.AddString( _T( "None" ) );
 	m_interpolation.AddString( _T( "Linear" ) );
-	m_interpolation.AddString( _T( "Cosine" ) );
-	m_interpolation.AddString( _T( "4 Point B-Spline" ) );
-	m_interpolation.AddString( _T( "6 Point Osculating" ) );
-	m_interpolation.AddString( _T( "6 Point B-Spline" ) );
-	m_interpolation.AddString( _T( "16 Point Lanczos Sinc" ) );
+	m_interpolation.AddString( _T( "4 Point Legrange" ) );
+	m_interpolation.AddString( _T( "6 Point Legrange" ) );
+	m_interpolation.AddString( _T( "16 Point Nuttall 3-Term Sinc" ) );
 	m_interpolation.SetCurSel( cfg_interpolation );
-	
+
 	char temp[16];
 
 	for( unsigned n = _countof(srate_tab); n--; )
@@ -1201,11 +1207,11 @@ BOOL CMyPreferences::OnInitDialog(CWindow, LPARAM) {
 	m_link_ncsf.SetLabel( _T( "NCSF Home Page" ) );
 	m_link_ncsf.SetHyperLink( _T( "http://www.cyberbotx.com/NCSF/" ) );
 	m_link_ncsf.SubclassWindow( GetDlgItem( IDC_URL ) );
-	
+
 	m_link_kode54.SetLabel( _T( "kode's foobar2000 plug-ins" ) );
 	m_link_kode54.SetHyperLink( _T( "http://kode54.foobar2000.org/" ) );
 	m_link_kode54.SubclassWindow( GetDlgItem( IDC_K54 ) );
-	
+
 	{
 		/*OSVERSIONINFO ovi = { 0 };
 		ovi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
@@ -1219,7 +1225,7 @@ BOOL CMyPreferences::OnInitDialog(CWindow, LPARAM) {
 			m_link_kode54.m_clrVisited = color;
 		}
 	}
-	
+
 	return FALSE;
 }
 
@@ -1253,7 +1259,7 @@ void CMyPreferences::reset() {
 	uSetDlgItemText( m_hWnd, IDC_DLENGTH, (char *)&temp );
 	print_time_crap( default_cfg_deffade, (char *)&temp );
 	uSetDlgItemText( m_hWnd, IDC_DFADE, (char *)&temp );
-	
+
 	OnChanged();
 }
 
@@ -1288,7 +1294,7 @@ void CMyPreferences::apply() {
 		print_time_crap( cfg_deffade, (char *)&temp );
 		uSetDlgItemText( m_hWnd, IDC_DFADE, (char *)&temp );
 	}
-	
+
 	OnChanged(); //our dialog content has not changed but the flags have - our currently shown values now match the settings so the apply button can be disabled
 }
 
